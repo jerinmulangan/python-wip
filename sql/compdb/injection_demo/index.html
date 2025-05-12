@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>XYZCOMPANY Query Demo</title>
+</head>
+<body>
+  <h1>Vulnerable SELECT</h1>
+  <form action="select.php" method="get">
+    Personal ID: <input name="pid"><br>
+    First name: <input name="first"><br>
+    <button type="submit">Search</button>
+  </form>
+
+  <h1>Vulnerable UPDATE</h1>
+  <form action="update.php" method="post">
+    Personal ID: <input name="pid"><br>
+    New City:     <input name="city"><br>
+    <button type="submit">Change City</button>
+  </form>
+
+  <h1>Safe SELECT (prepared)</h1>
+  <form action="prepared_select.php" method="get">
+    Personal ID: <input name="pid"><br>
+    First name: <input name="first"><br>
+    <button type="submit">Search (safe)</button>
+  </form>
+</body>
+</html>

@@ -1,6 +1,0 @@
-program
-  var Flag as bool ;
-begin
-  Flag := true ;
-  writeInt Flag ;
-end

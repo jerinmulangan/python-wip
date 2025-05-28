@@ -84,11 +84,11 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <Github className="h-5 w-5 text-primary" />
                   <Link
-                    href="https://github.com/mulanganjerin"
+                    href="https://github.com/jerinmulangan"
                     target="_blank"
                     className="hover:text-primary transition-colors"
                   >
-                    github.com/mulanganjerin
+                    github.com/jerinmulangan
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
@@ -116,18 +116,24 @@ export default function Home() {
                 <SkillBadge name="Next.js" />
                 <SkillBadge name="TypeScript" />
                 <SkillBadge name="Tailwind CSS" />
-                <SkillBadge name="JavaScript" />
-                <SkillBadge name="HTML/CSS" />
+                <SkillBadge name="JavaScript (ES6+)" />
+                <SkillBadge name="HTML5/CSS3" />
+                <SkillBadge name="Bootstrap" />
+                <SkillBadge name="ESLint" />
               </div>
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-semibold">Backend</h3>
               <div className="flex flex-wrap gap-2">
-                <SkillBadge name="Node.js" />
-                <SkillBadge name="Express" />
                 <SkillBadge name="Python" />
+                <SkillBadge name="Node.js" />
+                <SkillBadge name="Express.js" />
+                <SkillBadge name="Java/Springboot" />
+                <SkillBadge name="C# ASP.NET" />
+                <SkillBadge name="C/C++" />
                 <SkillBadge name="Django" />
                 <SkillBadge name="PostgreSQL" />
+                <SkillBadge name="MySQL" />
                 <SkillBadge name="MongoDB" />
               </div>
             </div>
@@ -139,6 +145,8 @@ export default function Home() {
                 <SkillBadge name="AWS" />
                 <SkillBadge name="CI/CD" />
                 <SkillBadge name="Jest" />
+                <SkillBadge name="JUnit" />
+                <SkillBadge name="Pytest" />
                 <SkillBadge name="Figma" />
               </div>
             </div>
@@ -198,7 +206,7 @@ export default function Home() {
         <div className="container py-8 flex flex-col md:flex-row items-center justify-between">
           <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Jerin Mulangan. All rights reserved.</p>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <Link href="https://github.com/mulanganjerin" target="_blank" aria-label="GitHub">
+            <Link href="https://github.com/jerinmulangan" target="_blank" aria-label="GitHub">
               <Github className="h-5 w-5 hover:text-primary transition-colors" />
             </Link>
             <Link href="https://linkedin.com/in/jerinmulangan" target="_blank" aria-label="LinkedIn">

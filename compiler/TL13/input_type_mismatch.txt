@@ -1,0 +1,5 @@
+program
+  var F as bool ;
+begin
+  F := 123 ;
+end

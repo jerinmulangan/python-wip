@@ -1,15 +1,10 @@
-// DijkstraVisualizer.cpp
-// Compatible with SFML 2.6.x (stable API)
-// Build (inside project folder):
-//   g++ DijkstraVisualizer.cpp -std=c++17 -ISFML-2.6.0/include -LSFML-2.6.0/lib \
-//       -lsfml-graphics -lsfml-window -lsfml-system -o DijkstraVisualizer.exe
-// Copy DLLs from SFML-2.6.0/bin next to the EXE.
-
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <queue>
 #include <limits>
 #include <random>
+#include <variant>
+#include <type_traits>
 
 const int WIDTH  = 800;
 const int HEIGHT = 800;
@@ -63,7 +58,7 @@ void dijkstra(std::vector<std::vector<Node>>& grid, Node* start, Node* goal) {
         if (cur == goal) break;
         for (Node* nb : neighbors(grid, *cur)) {
             if (nb->visited) continue;
-            float nd = cur->dist + 1.f;  // grid cost = 1
+            float nd = cur->dist + 1.f;  // uniform cost
             if (nd < nb->dist) {
                 nb->dist = nd;
                 nb->previous = cur;
@@ -97,7 +92,8 @@ void drawGrid(sf::RenderWindow& win, const std::vector<std::vector<Node>>& grid,
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Dijkstra Visualizer");
+    // SFML 3: VideoMode takes Vector2u
+    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(WIDTH, HEIGHT)), "Dijkstra Visualizer (SFML 3)");
     auto grid = createGrid();
 
     Node* start = &grid[10][10];
@@ -106,7 +102,7 @@ int main() {
     // random walls
     std::mt19937 rng(static_cast<unsigned>(time(nullptr)));
     std::uniform_int_distribution<int> distR(0, ROWS-1), distC(0, COLS-1);
-    for (int i=0;i<2000;++i) {
+    for (int i = 0; i < 2000; ++i) {
         int r = distR(rng), c = distC(rng);
         if (&grid[r][c] != start && &grid[r][c] != goal)
             grid[r][c].isWall = true;
@@ -115,11 +111,16 @@ int main() {
     dijkstra(grid, start, goal);
 
     while (window.isOpen()) {
-        sf::Event ev;
-        while (window.pollEvent(ev)) {
-            if (ev.type == sf::Event::Closed)
-                window.close();
+        if (auto evOpt = window.pollEvent()) {
+            // SFML 3: pollEvent returns optional<Event> where Event is std::variant of event structs
+            std::visit([&](auto&& ev) {
+                using Ev = std::decay_t<decltype(ev)>;
+                if constexpr (std::is_same_v<Ev, sf::Event::Closed>) {
+                    window.close();
+                }
+            }, *evOpt);
         }
+
         window.clear();
         drawGrid(window, grid, start, goal);
         window.display();

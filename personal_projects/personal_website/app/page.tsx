@@ -185,10 +185,10 @@ export default function Home() {
               demoUrl="https://weather-app-demo.com"
             />
             <ProjectCard
-              title="Personal Blog"
-              description="A blog platform built with modern technologies featuring a custom CMS."
-              tags={["Next.js", "MDX", "Tailwind CSS"]}
-              githubUrl="https://github.com/johndoe/blog"
+              title="Dijkstra Algorithm Visualizer"
+              description="Dijkstra's algorithm visualizer on 160x160 grid with 22,500 nodes to find optimal path, made with SFML framework and MatPlotLib to visualize the algorithm."
+              tags={["C++", "SFML Framework", "Python"]}
+              githubUrl="https://github.com/jerinmulangan/dir/tree/main/personal_projects/visual_dijkstra"
               demoUrl="https://blog-demo.com"
             />
             <ProjectCard

@@ -195,7 +195,7 @@ export default function Home() {
               title="Portfolio Website"
               description="This portfolio website showcasing my projects and skills."
               tags={["Next.js", "TypeScript", "Framer Motion"]}
-              githubUrl="https://github.com/johndoe/portfolio"
+              githubUrl="https://github.com/jerinmulangan/dir/tree/main/personal_projects/personal_website"
               demoUrl="#"
             />
           </div>

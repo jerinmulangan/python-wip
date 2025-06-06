@@ -1,6 +1,6 @@
 # Dijkstra Pathfinding Visualizer
 
-Interactive randomly generated grid‑based visualizer written in **C++** using the **SFML 3.0.0 preview**. It demonstrates real‑time Dijkstra routing across a 150 × 150 grid (22  500 nodes), logs performance metrics to **CSV**, and overlays live stats on screen.
+Interactive randomly generated grid‑based visualizer written in **C++** using the **SFML 3.0.0**. It demonstrates real‑time Dijkstra routing across a 150 × 150 grid (22  500 nodes); it solves the shortest path in ≈ 20 ms, shows start/goal, visited cells, and the final route in real‑time, while logging performance metrics to **CSV**, and overlays live stats on screen. Optionally a **Python** program reads the data stored in the **CSV** and using **Pandas** and **MatPlotLib** libraries displays the results of all runs over time taken.
 
 ---
 

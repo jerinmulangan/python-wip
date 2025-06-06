@@ -189,7 +189,7 @@ export default function Home() {
               description="Dijkstra's algorithm visualizer on 160x160 grid with 22,500 nodes to find optimal path, made with SFML framework and MatPlotLib to visualize the algorithm."
               tags={["C++", "SFML Framework", "Python"]}
               githubUrl="https://github.com/jerinmulangan/dir/tree/main/personal_projects/visual_dijkstra"
-              demoUrl="https://blog-demo.com"
+              demoUrl="https://github.com/jerinmulangan/dir/tree/main/personal_projects/visual_dijkstra"
             />
             <ProjectCard
               title="Portfolio Website"

@@ -1,6 +1,0 @@
-program 
-  var A as int ;
-begin
-  B := 42 ;
-  writeInt B ;
-end

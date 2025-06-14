@@ -6,12 +6,16 @@
 *.json text
 *.html text
 *.css text
-*.sql text
+
 *.md text
 *.yml text
 *.yaml text
 
 *.ipynb text linguist-language=Jupyter\ Notebook
+
+*.sql linguist-detectable=true
+*.sql linguist-language=sql
+*.sql text
 
 *.png binary
 *.jpg binary
@@ -29,4 +33,3 @@
 .vscode/* linguist-vendored
 .DS_Store linguist-generated
 
-*.py linguist-detectable=true

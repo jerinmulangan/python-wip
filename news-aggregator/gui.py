@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea,
-    QComboBox, QHBoxLayout, QListWidget, QListWidgetItem, QGroupBox
+    QListWidget, QListWidgetItem, QGroupBox
 )
 from PyQt5.QtCore import QTimer, Qt
 
@@ -11,8 +11,8 @@ class NewsApp(QWidget):
         self.resize(800, 1000)
         self.fetch_news_callback = fetch_news_callback
 
-        self.selected_platforms = ["CNN", "NBC", "NPR"]
-        self.selected_topics = ["World"]
+        self.selected_platforms = ["CNN", "NBC", "NPR", "TLDR"]
+        self.selected_topics = ["World", "Tech"]
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -21,7 +21,7 @@ class NewsApp(QWidget):
         platform_layout = QVBoxLayout()
         self.platform_selector = QListWidget()
         self.platform_selector.setSelectionMode(QListWidget.MultiSelection)
-        for platform in ["CNN", "NBC", "NPR"]:
+        for platform in ["CNN", "NBC", "NPR", "TLDR"]:
             item = QListWidgetItem(platform)
             item.setSelected(platform in self.selected_platforms)
             self.platform_selector.addItem(item)
@@ -33,7 +33,7 @@ class NewsApp(QWidget):
         topic_layout = QVBoxLayout()
         self.topic_selector = QListWidget()
         self.topic_selector.setSelectionMode(QListWidget.MultiSelection)
-        for topic in ["World", "US News", "Politics", "Business", "Sports"]:
+        for topic in ["World", "US News", "Politics", "Business", "Sports", "Tech", "Infosec", "WebDev", "DevOps", "AI", "Data"]:
             item = QListWidgetItem(topic)
             item.setSelected(topic in self.selected_topics)
             self.topic_selector.addItem(item)

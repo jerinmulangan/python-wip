@@ -1,0 +1,32 @@
+* text=auto eol=lf
+
+*.py text diff=python
+*.js text diff=javascript
+*.ts text diff=typescript
+*.json text
+*.html text
+*.css text
+*.sql text
+*.md text
+*.yml text
+*.yaml text
+
+*.ipynb text linguist-language=Jupyter\ Notebook
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.exe binary
+*.pdf binary
+*.pkl binary
+*.h5 binary
+
+*.pkl -diff
+*.h5 -diff
+
+.vscode/* linguist-vendored
+.DS_Store linguist-generated
+
+*.py linguist-detectable=true

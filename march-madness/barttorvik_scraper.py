@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #barttorvik_scraper.py
 
 from pathlib import Path
@@ -7,22 +8,59 @@ import warnings
 
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
 from io import StringIO
 
-BASE_URL = "https://barttorvik.com/trank.php?year={year}&sort=&conlimit=#"
-START_YEAR, END_YEAR = 2008, 2025          
-OUT_DIR = Path("data")                     
-OUT_DIR.mkdir(exist_ok=True)
+START_YEAR, END_YEAR = 2008, 2025
+OUT_DIR = Path("data"); OUT_DIR.mkdir(exist_ok=True)
 
-HEADERS = {                                 
-    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                   "AppleWebKit/537.36 (KHTML, like Gecko) "
-                   "Chrome/124.0.0.0 Safari/537.36")
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    )
 }
 
+
+TYPES  = ["R", "C", "N"]
+          
+VENUES = ["All", "H", "A-N", "A"]      
+
+URL_TEMPLATE = (
+    "https://barttorvik.com/trank.php"
+    "?year={year}&sort=&top=0&conlimit=All"
+    "&venue={venue}&type={ttype}#"
+)
+
+TEAM_RE = re.compile(r"""
+    ^\s*
+    (?P<name>.*?)
+    \s+(?P<seed>\d+)\s*seed
+    (?:,\s*(?P<res>.+))? 
+    $""", re.VERBOSE | re.IGNORECASE)
+
+def _split_team_col(df: pd.DataFrame) -> pd.DataFrame:
+    def extract(cell: str):
+        m = TEAM_RE.match(str(cell))
+        if not m:
+            return pd.Series({"team": str(cell).strip(),
+                              "seed": pd.NA,
+                              "tourney_res": pd.NA})
+        return pd.Series({
+            "team":         m.group("name").strip(),
+            "seed":         int(m.group("seed")),
+            "tourney_res":  (m.group("res") or "").strip() or pd.NA,
+        })
+    meta = df["team"].apply(extract)
+    return df.drop(columns=["team"]).join(meta)
+
+def _drop_internal_headers(df: pd.DataFrame) -> pd.DataFrame:
+    mask = df["rk"].astype(str).str.fullmatch(r"\d+")
+    df = df[mask].copy()
+    df["rk"] = df["rk"].astype(int)
+    return df
+
 def _clean_cols(df: pd.DataFrame) -> pd.DataFrame:
-    # standardize column names
     df = df.copy()
     df.columns = (
         df.columns.str.strip()
@@ -32,69 +70,47 @@ def _clean_cols(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
-# request + pandas
-def scrape_year_requests(year: int) -> pd.DataFrame:
-    url = BASE_URL.format(year=year)
-    resp = requests.get(url, headers=HEADERS, timeout=30)
+def _scrape_url(url: str) -> pd.DataFrame:
+    resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
-
     tables = pd.read_html(StringIO(resp.text), flavor="bs4", header=1)
     if not tables:
-        raise ValueError("request: no tables found")
+        raise RuntimeError(f"No table found at {url}")
     df = tables[0]
     df = _clean_cols(df)
-    df["year"] = year
+    df = _drop_internal_headers(df)
+    df = _split_team_col(df)
     return df
 
-# selenium fallback
-def scrape_year_selenium(year: int, driver_path: str = "C:/Users/jerin/Documents/chromedriver.exe") -> pd.DataFrame:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.common.by import By
-
-    service = Service(driver_path)
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    driver = webdriver.Chrome(service=service, options=options)
-
-    try:
-        url = BASE_URL.format(year=year)
-        driver.get(url)
-        time.sleep(1)
-
-        soup = BeautifulSoup(driver.page_source, "lxml")
-        tables = pd.read_html(StringIO(str(soup)), header=1)
-        if not tables:
-            raise ValueError("selenium: no tables found")
-        df = tables[0]
-        df = _clean_cols(df)
-        df["year"] = year
-        return df
-    finally:
-        driver.quit()
-
 def main():
-    master_frames = []
+    all_frames = []
 
-    for yr in range(START_YEAR, END_YEAR + 1):
-        print(f"» scraping {yr} … ", end="", flush=True)
-        try:
-            df_year = scrape_year_requests(yr)
-            print("requests")
-        except Exception as e:
-            warnings.warn(f"requests failed for {yr} ({e}); fallback: selenium")
-            df_year = scrape_year_selenium(yr)
-            print("selenium")
+    for year in range(START_YEAR, END_YEAR + 1):
+        for ttype in TYPES:
+            for venue in VENUES:
+                url = URL_TEMPLATE.format(year=year, ttype=ttype, venue=venue)
+                print(f"» {year} / type={ttype} / venue={venue} … ", end="", flush=True)
+                try:
+                    df = _scrape_url(url)
+                    print("ok")
+                except Exception as e:
+                    warnings.warn(f"  → failed ({e})")
+                    continue
 
-        # write out csv
-        csv_year = OUT_DIR / f"trank_{yr}.csv"
-        df_year.to_csv(csv_year, index=False)
-        master_frames.append(df_year)
+                df["year"]  = year
+                df["type"]  = ttype
+                df["venue"] = venue
+                fname = OUT_DIR / f"trank_{year}_{ttype}_{venue.replace('-', '')}.csv"
+                df.to_csv(fname, index=False)
+                all_frames.append(df)
 
-    # combine seasons
-    df_all = pd.concat(master_frames, ignore_index=True)
-    df_all.to_csv(OUT_DIR / "trank_2008_2025.csv", index=False)
-    print(f"\nsaved {len(master_frames)} yearly files + master csv to {OUT_DIR.resolve()}")
+                time.sleep(.5)
+
+    if all_frames:
+        master = pd.concat(all_frames, ignore_index=True)
+        master.to_csv(OUT_DIR / f"trank_{START_YEAR}_{END_YEAR}_all.csv",
+                      index=False)
+        print("✓ wrote master CSV for all years + filters")
 
 if __name__ == "__main__":
     main()

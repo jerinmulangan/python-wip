@@ -11,11 +11,16 @@
 *.yml text
 *.yaml text
 
+*.ipynb linguist-detectable=true
+*.ipynb text
 *.ipynb text linguist-language=Jupyter\ Notebook
 
 *.sql linguist-detectable=true
 *.sql linguist-language=sql
 *.sql text
+
+*.py linguist-detectable=true
+*.py text linguist-language=python
 
 *.png binary
 *.jpg binary

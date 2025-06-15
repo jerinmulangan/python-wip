@@ -182,7 +182,11 @@ def evaluate_ensembles(X, y, order):
     rf.fit(X, y)
     y_rf = rf.predict(X)
     print("\nRF classification report:")
-    print(classification_report(y, y_rf, target_names=order))
+
+    present = sorted(np.unique(y))
+    names   = [order[i] for i in present]
+    
+    print(classification_report(y, y_rf, labels=present, target_names=names))
 
     # 2) Gradient Boosting
     gb = GradientBoostingClassifier(
@@ -196,7 +200,11 @@ def evaluate_ensembles(X, y, order):
     gb.fit(X, y)
     y_gb = gb.predict(X)
     print("\nGB classification report:")
-    print(classification_report(y, y_gb, target_names=order))
+
+    present = sorted(np.unique(y))
+    names   = [order[i] for i in present]
+
+    print(classification_report(y, y_gb, labels=present, target_names=names))
 
     return rf, gb
 

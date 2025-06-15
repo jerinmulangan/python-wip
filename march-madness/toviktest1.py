@@ -72,6 +72,16 @@ def attach_label(df,
     after = len(df)
     print(f"Dropped {before-after} rows with unmapped tourney_res")
 
+    before = len(df)
+    df = df[df["label"].notna()].copy()
+    df["label"] = df["label"].astype(int)
+    after = len(df)
+    print(f"Dropped {before-after} rows with unmapped tourney_res")
+
+    # prune for present labels
+    present = sorted(df["label"].unique())
+    order   = [cls for cls in order if ord_map[cls] in present]
+
     feat_df = (
         df
           .drop(columns=["year","team","tourney_res","label"])

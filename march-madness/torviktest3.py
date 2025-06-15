@@ -83,6 +83,10 @@ def attach_label(df,
     df["label"] = df["label"].astype(int)
     print(f"Dropped {before-len(df)} rows with unmapped tourney_res")
 
+    # 4b) prune order down to present labels
+    present = sorted(df["label"].unique())
+    order = [ r for r in order if ord_map[r] in present]
+
     # 5) binary flags
     df["made_S16"] = (df.label >= ord_map["Sweet Sixteen"]).astype(int)
     df["is_champ"] = (df.label == ord_map["Champion"]).astype(int)
@@ -136,6 +140,17 @@ def evaluate_ensembles(X, y, order):
         print(f"{name} CV acc: {scores.mean():.4f} ± {scores.std():.4f}")
         mdl.fit(X, y)
         print(f"{name} report:\n{classification_report(y, mdl.predict(X), target_names=order)}")
+        # nly report on labels that are present
+        labels_present = sorted(set(y))
+        target_names = [ order[i] for i in labels_present ]
+        print(f"{name} report:\n" +
+              classification_report(
+                  y,
+                  mdl.predict(X),
+                  labels=labels_present,
+                  target_names=target_names
+              )
+        )
     return rf, gb
 
 
@@ -164,6 +179,20 @@ def evaluate_xgb(X, y, order):
     print(f"XGB CV accuracy: {search.best_score_:.4f}")
     print("\nXGB report:\n" +
           classification_report(y, best.predict(X), target_names=order))
+    
+    # report on present labels
+    yp = best.predict(X)
+    labels_present = sorted(set(y))
+    target_names = [ order[i] for i in labels_present ]
+    print("\nXGB report:\n" +
+          classification_report(
+              y,
+              yp,
+              labels=labels_present,
+              target_names=target_names
+          )
+    )    
+
     return best
 
 class LogisticWrapper:
@@ -184,6 +213,20 @@ def stack_models(models, X, y, order):
     meta.fit(oof, y)
     print("\nMeta-model report:\n" +
           classification_report(y, meta.predict(oof), target_names=order))
+    
+    # report present labels
+    ypred = meta.predict(oof)
+    labels_present = sorted(set(y))
+    target_names = [ order[i] for i in labels_present ]
+    print("\nMeta-model report:\n" +
+          classification_report(
+              y,
+              ypred,
+              labels=labels_present,
+              target_names=target_names
+          )
+    )    
+
     return meta
 
 def calibrate_models(models, X, y):

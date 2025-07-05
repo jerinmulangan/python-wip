@@ -17,6 +17,8 @@ from sklearn.calibration      import CalibratedClassifierCV
 from sklearn.linear_model     import LogisticRegression
 from xgboost                  import XGBClassifier
 
+from sklearn.base import BaseEstimator, ClassifierMixin
+
 def sigmoid(z):
     z = np.clip(z, -500, 500)
     return 1 / (1 + np.exp(-z))
@@ -152,9 +154,20 @@ def evaluate_ensembles(X, y, order):
     for name, mdl in [("RandomForest", rf), ("GradientBoosting", gb)]:
         scores = cross_val_score(mdl, X, y, cv=5, scoring="accuracy", n_jobs=-1)
         print(f"{name} CV acc: {scores.mean():.4f} ± {scores.std():.4f}")
-        mdl.fit(X, y)
-        print(f"{name} report:\n{classification_report(y, mdl.predict(X), target_names=order)}")
-    return rf, gb
+        
+
+        labels_present = sorted(set(y))
+        names_present  = [order[i] for i in labels_present]
+        preds = cross_val_predict(mdl, X, y, cv=5, method="predict", n_jobs=-1)
+        print(f"\n{name} 5-fold CV classification report:")
+        print(classification_report(
+            y,
+            preds,
+            labels=labels_present,
+            target_names=names_present
+        ))
+
+        return rf, gb
 
 
 def evaluate_xgb(X, y, order):
@@ -164,7 +177,6 @@ def evaluate_xgb(X, y, order):
         objective="multi:softprob",
         num_class=len(order),
         eval_metric="mlogloss",
-        use_label_encoder=False,
         random_state=42,
         n_jobs=-1
     )
@@ -180,13 +192,27 @@ def evaluate_xgb(X, y, order):
     best = search.best_estimator_
     print("Best XGB params:", search.best_params_)
     print(f"XGB CV accuracy: {search.best_score_:.4f}")
-    print("\nXGB report:\n" +
-          classification_report(y, best.predict(X), target_names=order))
+    
+    yp = best.predict(X)
+    labels_present = sorted(set(y))
+    names_present  = [order[i] for i in labels_present]
+    print("\nXGB classification report:")
+    print(classification_report(
+        y,
+        yp,
+        labels=labels_present,
+        target_names=names_present
+    ))
+
     return best
 
-class LogisticWrapper:
+class LogisticWrapper(BaseEstimator, ClassifierMixin):
     def __init__(self, W):
         self.W = W
+
+    def fit(self, X, y=None):
+        return self
+
     def predict_proba(self, X):
         return sigmoid(X.dot(self.W.T))
 
@@ -200,8 +226,18 @@ def stack_models(models, X, y, order):
         print(f"  collected OOF prob for {name}")
     meta = LogisticRegression(multi_class="multinomial", max_iter=2000)
     meta.fit(oof, y)
-    print("\nMeta-model report:\n" +
-          classification_report(y, meta.predict(oof), target_names=order))
+    
+    ypred = meta.predict(oof)
+    labels_present = sorted(set(y))
+    names_present  = [order[i] for i in labels_present]
+    print("\nMeta-model classification report:")
+    print(classification_report(
+        y,
+        ypred,
+        labels=labels_present,
+        target_names=names_present
+    ))
+
     return meta
 
 def calibrate_models(models, X, y):

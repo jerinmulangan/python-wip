@@ -153,19 +153,20 @@ def build_bracket_for_year(df_all, predictor, order, year, feature_names):
     # pick the class with highest probability
     pred_idx = np.argmax(probs, axis=1)
 
-    # map back to labels
-    df_year["pred_round"] = [order[i] for i in pred_idx]
+    ix_s16 = order.index("Sweet Sixteen")
+    ix_e8  = order.index("Elite Eight")
+    ix_f4  = order.index("Final Four")
+    ix_ru  = order.index("Runner-Up")
+    ix_ch  = order.index("Champion")
 
-    # collect survivors
-    ord_map = {r:i for i,r in enumerate(order)}
-    survivors = {
-        "Sweet 16":  df_year[df_year.pred_round >= ord_map["Sweet Sixteen"]]["team"].tolist(),
-        "Elite 8":   df_year[df_year.pred_round >= ord_map["Elite Eight"]]["team"].tolist(),
-        "Final 4":   df_year[df_year.pred_round >= ord_map["Final Four"]]["team"].tolist(),
-        "Finalists": df_year[df_year.pred_round >= ord_map["Runner-Up"]]["team"].tolist(),
-        "Champion":  df_year[df_year.pred_round == ord_map["Champion"]]["team"].tolist(),
+    teams = df_year["team"].tolist()
+    return {
+      "Sweet 16":  [team for team, p in zip(teams, pred_idx) if p >= ix_s16],
+      "Elite 8":   [team for team, p in zip(teams, pred_idx) if p >= ix_e8],
+      "Final 4":   [team for team, p in zip(teams, pred_idx) if p >= ix_f4],
+      "Finalists": [team for team, p in zip(teams, pred_idx) if p >= ix_ru],
+      "Champion":  [team for team, p in zip(teams, pred_idx) if p == ix_ch],
     }
-    return survivors
 
 def evaluate_ensembles(X, y, order):
     print("\n––– Ensemble Comparison (5-fold CV) –––")
@@ -185,7 +186,7 @@ def evaluate_ensembles(X, y, order):
 
     present = sorted(np.unique(y))
     names   = [order[i] for i in present]
-    
+
     print(classification_report(y, y_rf, labels=present, target_names=names))
 
     # 2) Gradient Boosting

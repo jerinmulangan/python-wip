@@ -110,7 +110,7 @@ def main():
         master = pd.concat(all_frames, ignore_index=True)
         master.to_csv(OUT_DIR / f"trank_{START_YEAR}_{END_YEAR}_all.csv",
                       index=False)
-        print("✓ wrote master CSV for all years + filters")
+        print("wrote master CSV for all years + filters")
 
 if __name__ == "__main__":
     main()
